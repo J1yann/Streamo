@@ -1,6 +1,7 @@
 import { useConvexAuth } from "convex/react";
-import { Bookmark, BookmarkCheck } from "lucide-react";
+import { Bookmark, BookmarkCheck, Sparkles } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router";
 import { useWatchlist } from "~/hooks/useWatchlist";
 
 interface WatchlistButtonProps {
@@ -26,7 +27,17 @@ export function WatchlistButton({
   const inWatchlist = isInWatchlist(mediaId, mediaType);
 
   if (!isAuthenticated) {
-    return null;
+    return (
+      <Link
+        to="/signin"
+        className="flex items-center gap-3 px-8 py-4 rounded-full bg-white/90 dark:bg-white/10 backdrop-blur text-[#111111] dark:text-white font-semibold hover:bg-white dark:hover:bg-white/20 transition-all shadow-lg text-lg group"
+        title="Sign in to save to your watchlist"
+      >
+        <Bookmark size={24} className="group-hover:scale-110 transition-transform" />
+        <span>Sign In to Save</span>
+        <Sparkles size={18} className="text-[#4D7CFF] animate-pulse" />
+      </Link>
+    );
   }
 
   const handleToggle = async () => {
