@@ -15,10 +15,16 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
           );
 
           if (verification) {
-            // User signed up with verified email - set isEmailVerified
-            await ctx.db.patch(args.userId, {
+            // User signed up with verified email - set isEmailVerified and name
+            const updates: { isEmailVerified: boolean; name?: string } = {
               isEmailVerified: true,
-            });
+            };
+            
+            if (verification.pendingRegistration?.name) {
+              updates.name = verification.pendingRegistration.name;
+            }
+            
+            await ctx.db.patch(args.userId, updates);
           }
         }
       }
