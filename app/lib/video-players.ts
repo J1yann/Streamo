@@ -1,6 +1,7 @@
 export interface VideoPlayer {
   name: string;
   urlTemplate: string;
+  tvUrlTemplate?: string; // Optional separate template for TV shows
 }
 
 export function getVideoPlayers(): VideoPlayer[] {
@@ -14,11 +15,17 @@ export function getVideoPlayers(): VideoPlayer[] {
     
     if (!playerConfig) break;
     
-    const [name, urlTemplate] = playerConfig.split("|");
+    // Support format: Name|MovieURL or Name|MovieURL|TVURL
+    const parts = playerConfig.split("|");
+    const name = parts[0]?.trim();
+    const urlTemplate = parts[1]?.trim();
+    const tvUrlTemplate = parts[2]?.trim();
+    
     if (name && urlTemplate) {
       players.push({
-        name: name.trim(),
-        urlTemplate: urlTemplate.trim(),
+        name,
+        urlTemplate,
+        tvUrlTemplate: tvUrlTemplate || undefined,
       });
     }
     
@@ -49,12 +56,17 @@ export function getPlayerUrl(
   season?: number,
   episode?: number
 ): string {
+  // Use TV-specific template if available and media is TV show
+  const template = mediaType === "tv" && player.tvUrlTemplate 
+    ? player.tvUrlTemplate 
+    : player.urlTemplate;
+
   // Support multiple placeholder formats:
   // {id} or {tmdb_id} or {media_id} - TMDB ID
   // {type} or {media_type} - movie or tv
   // {season} or {s} - season number
   // {episode} or {e} - episode number
-  let url = player.urlTemplate
+  let url = template
     .replace(/\{id\}/g, mediaId.toString())
     .replace(/\{tmdb_id\}/g, mediaId.toString())
     .replace(/\{media_id\}/g, mediaId.toString())
