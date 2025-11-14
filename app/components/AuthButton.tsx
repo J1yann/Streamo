@@ -33,7 +33,7 @@ export function AuthButton() {
         >
           <User size={20} />
           <span className="hidden sm:inline text-sm font-medium">
-            {currentUser?.email?.split("@")[0] || "Account"}
+            {currentUser?.name || currentUser?.email?.split("@")[0] || "Account"}
           </span>
         </DropdownMenuTrigger>
         <DropdownMenuContent 
