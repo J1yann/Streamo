@@ -4,9 +4,15 @@ import { tmdb, getImageUrl, getTitle, type Media } from "~/lib/tmdb";
 import { motion, AnimatePresence } from "framer-motion";
 import { MediaCard } from "~/components/MediaCard";
 import { Icon } from "~/components/Icon";
-import { Play, Clock, Calendar, Info } from "lucide-react";
+import { Play, Clock, Calendar, Info, ChevronDown } from "lucide-react";
 import { useState, useMemo } from "react";
 import { getVideoPlayers, getPlayerUrl } from "~/lib/video-players";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 
 export async function loader({ params }: Route.LoaderArgs) {
   const id = parseInt(params.id);
@@ -184,38 +190,48 @@ export default function Watch({ loaderData }: Route.ComponentProps) {
                     <span className="text-sm font-medium text-black/70 dark:text-white/70 shrink-0">
                       Season:
                     </span>
-                    <select
-                      value={selectedSeason}
-                      onChange={(e) => {
-                        setSelectedSeason(parseInt(e.target.value));
-                        setSelectedEpisode(1);
-                      }}
-                      className="px-4 py-2 bg-white/90 dark:bg-[#1F2937] backdrop-blur text-[#111111] dark:text-white rounded-full text-sm font-medium border-none outline-none cursor-pointer shadow-lg"
-                      style={{ colorScheme: 'dark' }}
-                    >
-                      {seasons.map((season) => (
-                        <option key={season.season_number} value={season.season_number} className="bg-white dark:bg-[#1F2937]">
-                          {season.name}
-                        </option>
-                      ))}
-                    </select>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger className="px-4 py-2 bg-white/90 dark:bg-[#1F2937] backdrop-blur text-[#111111] dark:text-white rounded-full text-sm font-medium border-none outline-none cursor-pointer shadow-lg flex items-center gap-2 hover:bg-white dark:hover:bg-[#374151] transition-colors">
+                        {seasons.find(s => s.season_number === selectedSeason)?.name || `Season ${selectedSeason}`}
+                        <ChevronDown size={16} />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="bg-white dark:bg-[#1F2937] border-gray-200 dark:border-gray-700">
+                        {seasons.map((season) => (
+                          <DropdownMenuItem
+                            key={season.season_number}
+                            onClick={() => {
+                              setSelectedSeason(season.season_number);
+                              setSelectedEpisode(1);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            {season.name}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-medium text-black/70 dark:text-white/70 shrink-0">
                       Episode:
                     </span>
-                    <select
-                      value={selectedEpisode}
-                      onChange={(e) => setSelectedEpisode(parseInt(e.target.value))}
-                      className="px-4 py-2 bg-white/90 dark:bg-[#1F2937] backdrop-blur text-[#111111] dark:text-white rounded-full text-sm font-medium border-none outline-none cursor-pointer shadow-lg"
-                      style={{ colorScheme: 'dark' }}
-                    >
-                      {Array.from({ length: seasons.find(s => s.season_number === selectedSeason)?.episode_count || 1 }, (_, i) => i + 1).map((ep) => (
-                        <option key={ep} value={ep} className="bg-white dark:bg-[#1F2937]">
-                          Episode {ep}
-                        </option>
-                      ))}
-                    </select>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger className="px-4 py-2 bg-white/90 dark:bg-[#1F2937] backdrop-blur text-[#111111] dark:text-white rounded-full text-sm font-medium border-none outline-none cursor-pointer shadow-lg flex items-center gap-2 hover:bg-white dark:hover:bg-[#374151] transition-colors">
+                        Episode {selectedEpisode}
+                        <ChevronDown size={16} />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="bg-white dark:bg-[#1F2937] border-gray-200 dark:border-gray-700 max-h-[300px] overflow-y-auto">
+                        {Array.from({ length: seasons.find(s => s.season_number === selectedSeason)?.episode_count || 1 }, (_, i) => i + 1).map((ep) => (
+                          <DropdownMenuItem
+                            key={ep}
+                            onClick={() => setSelectedEpisode(ep)}
+                            className="cursor-pointer"
+                          >
+                            Episode {ep}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               )}
