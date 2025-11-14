@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MediaCard } from "~/components/MediaCard";
 import { Icon } from "~/components/Icon";
 import { Play, Clock, Calendar, Info, ChevronDown } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { getVideoPlayers, getPlayerUrl } from "~/lib/video-players";
 import {
   DropdownMenu,
@@ -13,6 +13,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { WatchlistButton } from "~/components/WatchlistButton";
+import { useWatchHistory } from "~/hooks/useWatchHistory";
 
 export async function loader({ params }: Route.LoaderArgs) {
   const id = parseInt(params.id);
@@ -94,6 +96,24 @@ export default function Watch({ loaderData }: Route.ComponentProps) {
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [selectedEpisode, setSelectedEpisode] = useState(1);
   const seasons = media.seasons?.filter(s => s.season_number > 0) || [];
+  
+  // Watch history tracking
+  const { addToHistory } = useWatchHistory();
+  
+  // Track when user starts watching
+  useEffect(() => {
+    if (showPlayer) {
+      addToHistory({
+        mediaId: params.id!,
+        mediaType,
+        title,
+        posterPath: media.poster_path || undefined,
+        backdropPath: media.backdrop_path || undefined,
+        season: isTVShow ? selectedSeason : undefined,
+        episode: isTVShow ? selectedEpisode : undefined,
+      }).catch(err => console.error("Failed to add to history:", err));
+    }
+  }, [showPlayer, params.id, mediaType, title, media.poster_path, media.backdrop_path, isTVShow, selectedSeason, selectedEpisode, addToHistory]);
   
   const playerUrl = useMemo(
     () => getPlayerUrl(
@@ -198,9 +218,14 @@ export default function Watch({ loaderData }: Route.ComponentProps) {
                         <Play size={24} fill="currentColor" />
                         Play Now
                       </button>
-                      <button className="px-8 py-4 bg-white/90 dark:bg-white/10 backdrop-blur text-[#111111] dark:text-white rounded-full font-semibold hover:bg-white dark:hover:bg-white/20 transition-all shadow-lg">
-                        Add to Watchlist
-                      </button>
+                      <WatchlistButton
+                        mediaId={params.id!}
+                        mediaType={mediaType}
+                        title={title}
+                        posterPath={media.poster_path || undefined}
+                        backdropPath={media.backdrop_path || undefined}
+                        overview={media.overview || undefined}
+                      />
                     </div>
                   </motion.div>
                 </div>
