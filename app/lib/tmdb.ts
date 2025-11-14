@@ -58,6 +58,7 @@ export const tmdb = {
   getTVDetails: (id: number) => fetchTMDB(`/tv/${id}`),
   getSeason: (tvId: number, seasonNumber: number) => fetchTMDB(`/tv/${tvId}/season/${seasonNumber}`),
   getSimilar: (type: "movie" | "tv", id: number) => fetchTMDB(`/${type}/${id}/similar`),
+  searchMulti: (query: string) => fetchTMDB(`/search/multi?query=${encodeURIComponent(query)}`),
 };
 
 export function getImageUrl(path: string | null, size: "w500" | "w780" | "original" = "w500") {

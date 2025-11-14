@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "~/lib/theme-context";
 import { Icon } from "./Icon";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Search } from "lucide-react";
 
 const navItems = [
   { path: "/home", label: "Home", icon: "home" },
@@ -62,24 +62,33 @@ export function Navbar() {
             })}
           </div>
 
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-            aria-label="Toggle theme"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              {theme === "light" ? (
-                <>
-                  <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
-                </>
-              ) : (
-                <>
-                  <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
-                  <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />
-                </>
-              )}
-            </svg>
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/search"
+              className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+              aria-label="Search"
+            >
+              <Search size={20} />
+            </Link>
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+              aria-label="Toggle theme"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                {theme === "light" ? (
+                  <>
+                    <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+                  </>
+                ) : (
+                  <>
+                    <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+                    <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />
+                  </>
+                )}
+              </svg>
+            </button>
+          </div>
         </div>
       </motion.nav>
 
@@ -111,6 +120,18 @@ export function Navbar() {
                 </button>
               </div>
               <nav className="p-4 space-y-2">
+                <Link
+                  to="/search"
+                  onClick={() => setIsSidebarOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                    location.pathname === "/search"
+                      ? "bg-[#4D7CFF]/10 text-[#4D7CFF]"
+                      : "text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5"
+                  }`}
+                >
+                  <Search size={20} />
+                  <span className="font-medium">Search</span>
+                </Link>
                 {navItems.map((item) => {
                   const isActive = location.pathname === item.path;
                   return (
