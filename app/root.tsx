@@ -55,15 +55,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
 import { Navbar } from "./components/Navbar";
 import { ThemeProvider } from "./lib/theme-context";
 import { ScrollerSkeleton } from "./components/LoadingSkeleton";
+import { ConvexClientProvider } from "./lib/convex";
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <Navbar />
-      <Suspense fallback={<div className="pt-8"><ScrollerSkeleton /></div>}>
-        <Outlet />
-      </Suspense>
-    </ThemeProvider>
+    <ConvexClientProvider>
+      <ThemeProvider>
+        <Navbar />
+        <Suspense fallback={<div className="pt-8"><ScrollerSkeleton /></div>}>
+          <Outlet />
+        </Suspense>
+      </ThemeProvider>
+    </ConvexClientProvider>
   );
 }
 

@@ -4,12 +4,14 @@ import { useTheme } from "~/lib/theme-context";
 import { Icon } from "./Icon";
 import { useState } from "react";
 import { Menu, X, Search } from "lucide-react";
+import { AuthButton } from "./AuthButton";
 
 const navItems = [
   { path: "/home", label: "Home", icon: "home" },
   { path: "/movies", label: "Movies", icon: "movie" },
   { path: "/tvshows", label: "TV Shows", icon: "tv" },
   { path: "/kids", label: "Kids", icon: "teddy" },
+  { path: "/watchlist", label: "Watchlist", icon: "bookmark" },
 ];
 
 export function Navbar() {
@@ -88,6 +90,7 @@ export function Navbar() {
                 )}
               </svg>
             </button>
+            <AuthButton />
           </div>
         </div>
       </motion.nav>

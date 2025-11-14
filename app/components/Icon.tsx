@@ -10,6 +10,7 @@ import {
   Monitor,
   Library,
   AlertTriangle,
+  Bookmark,
   type LucideIcon,
 } from "lucide-react";
 
@@ -32,6 +33,7 @@ export function Icon({ name, className = "", size = 24 }: IconProps) {
     device: Monitor,
     library: Library,
     alert: AlertTriangle,
+    bookmark: Bookmark,
   };
 
   const IconComponent = icons[name] || icons.alert;
