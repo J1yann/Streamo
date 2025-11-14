@@ -8,8 +8,6 @@ export default defineSchema({
   users: defineTable({
     name: v.optional(v.string()),
     email: v.string(),
-    emailVerified: v.optional(v.number()),
-    image: v.optional(v.string()),
     isEmailVerified: v.optional(v.boolean()),
   }).index("by_email", ["email"]),
 

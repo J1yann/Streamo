@@ -31,10 +31,12 @@ export const sendEmailInternal = internalAction({
     }
     
     const resend = new Resend(resendApiKey);
+    const emailFrom = process.env.EMAIL_FROM || "test@verification.andoks.cc";
+    const fromAddress = emailFrom.includes("<") ? emailFrom : `Streamo <${emailFrom}>`;
     
     try {
       const { data, error } = await resend.emails.send({
-        from: "Streamo <noreply@verification.andoks.cc>",
+        from: fromAddress,
         to: [args.email],
         subject: "Your Streamo Verification Code",
         html: `
@@ -146,10 +148,12 @@ export const sendEmail = action({
     }
 
     const resend = new Resend(resendApiKey);
+    const emailFrom = process.env.EMAIL_FROM || "noreply@verification.andoks.cc";
+    const fromAddress = emailFrom.includes("<") ? emailFrom : `Streamo <${emailFrom}>`;
 
     try {
       const { data, error } = await resend.emails.send({
-        from: "Streamo <noreply@verification.andoks.cc>",
+        from: fromAddress,
         to: [args.email],
         subject: "Your Streamo Verification Code",
         html: `
@@ -310,8 +314,19 @@ export const verifyCodeAndRegister = mutation({
     if (user) {
       await ctx.db.patch(user._id, {
         isEmailVerified: true,
-        emailVerified: Date.now(),
       });
+
+      // Also update the authAccounts table
+      const authAccount = await ctx.db
+        .query("authAccounts")
+        .filter((q) => q.eq(q.field("userId"), user._id))
+        .first();
+
+      if (authAccount) {
+        await ctx.db.patch(authAccount._id, {
+          emailVerified: new Date().toISOString(),
+        });
+      }
     }
 
     return { success: true };
