@@ -37,18 +37,23 @@ export interface Episode {
 }
 
 async function fetchTMDB(endpoint: string) {
-  const res = await fetch(`${BASE_URL}${endpoint}?api_key=${TMDB_API_KEY}`);
+  const separator = endpoint.includes('?') ? '&' : '?';
+  const res = await fetch(`${BASE_URL}${endpoint}${separator}api_key=${TMDB_API_KEY}`);
   if (!res.ok) throw new Error("TMDB API error");
   return res.json();
 }
 
 export const tmdb = {
   getTrending: () => fetchTMDB("/trending/all/week"),
+  getTopRated: () => fetchTMDB("/movie/top_rated"),
   getTopRatedMovies: () => fetchTMDB("/movie/top_rated"),
   getTopRatedTV: () => fetchTMDB("/tv/top_rated"),
   getPopularMovies: () => fetchTMDB("/movie/popular"),
   getPopularTV: () => fetchTMDB("/tv/popular"),
-  getKidsContent: () => fetchTMDB("/discover/movie&certification_country=US&certification.lte=G"),
+  getUpcomingMovies: () => fetchTMDB("/movie/upcoming"),
+  getNowPlaying: () => fetchTMDB("/movie/now_playing"),
+  getNetflixContent: () => fetchTMDB("/discover/tv?with_networks=213"),
+  getKidsContent: () => fetchTMDB("/discover/movie?certification_country=US&certification.lte=G"),
   getMovieDetails: (id: number) => fetchTMDB(`/movie/${id}`),
   getTVDetails: (id: number) => fetchTMDB(`/tv/${id}`),
   getSeason: (tvId: number, seasonNumber: number) => fetchTMDB(`/tv/${tvId}/season/${seasonNumber}`),

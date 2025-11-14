@@ -52,7 +52,7 @@ export function HorizontalScroller({ title, items }: HorizontalScrollerProps) {
             {items.map((item, index) => (
               <div
                 key={item.id}
-                className="flex-shrink-0 w-[160px] md:w-[200px]"
+                className="shrink-0 w-[160px] md:w-[200px]"
               >
                 <MediaCard media={item} index={index} />
               </div>
