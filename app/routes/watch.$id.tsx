@@ -18,14 +18,57 @@ export async function loader({ params }: Route.LoaderArgs) {
   const id = parseInt(params.id);
   
   try {
-    const [movie, similar] = await Promise.all([
-      tmdb.getMovieDetails(id).catch(() => tmdb.getTVDetails(id)),
-      tmdb.getSimilar("movie", id).catch(() => tmdb.getSimilar("tv", id)),
+    // Try to fetch as movie first, then TV show
+    const media = await tmdb.getMovieDetails(id).catch(() => tmdb.getTVDetails(id));
+    const mediaType = media.title ? "movie" : "tv";
+    
+    // Extract genre IDs from the current media
+    const currentGenreIds = (media as any).genres?.map((g: any) => g.id) || [];
+    
+    // Fetch both similar and recommended content in parallel
+    const [similarData, recommendedData] = await Promise.all([
+      tmdb.getSimilar(mediaType, id).catch(() => ({ results: [] })),
+      tmdb.getRecommendations(mediaType, id).catch(() => ({ results: [] })),
     ]);
 
+    // Combine and deduplicate results
+    const allResults = [...(similarData.results || []), ...(recommendedData.results || [])];
+    const uniqueResults = Array.from(
+      new Map(allResults.map(item => [item.id, item])).values()
+    );
+
+    // Calculate genre match score for each item
+    const calculateGenreScore = (item: Media) => {
+      if (!item.genre_ids || currentGenreIds.length === 0) return 0;
+      const matchingGenres = item.genre_ids.filter(gid => currentGenreIds.includes(gid));
+      return matchingGenres.length / currentGenreIds.length; // Percentage of matching genres
+    };
+
+    // Sort by genre match first, then rating
+    const sortedResults = uniqueResults
+      .filter(item => item.poster_path && item.vote_average > 0) // Filter out items without posters or ratings
+      .map(item => ({
+        ...item,
+        genreScore: calculateGenreScore(item),
+      }))
+      .sort((a, b) => {
+        // Prioritize genre matching heavily
+        // Score: 60% genre match, 30% rating, 10% popularity
+        const scoreA = 
+          (a.genreScore * 60) + 
+          (a.vote_average * 3) + 
+          (Math.min(a.vote_average, 10));
+        const scoreB = 
+          (b.genreScore * 60) + 
+          (b.vote_average * 3) + 
+          (Math.min(b.vote_average, 10));
+        return scoreB - scoreA;
+      })
+      .slice(0, 10); // Show top 10 recommendations
+
     return {
-      media: movie,
-      similar: similar.results?.slice(0, 10) || [],
+      media,
+      similar: sortedResults,
     };
   } catch (error) {
     console.error("Failed to fetch media details:", error);

@@ -2,6 +2,11 @@ const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY || "YOUR_API_KEY_HERE";
 const BASE_URL = "https://api.themoviedb.org/3";
 const IMAGE_BASE = "https://image.tmdb.org/t/p";
 
+export interface Genre {
+  id: number;
+  name: string;
+}
+
 export interface Media {
   id: number;
   title?: string;
@@ -15,6 +20,8 @@ export interface Media {
   media_type?: "movie" | "tv";
   number_of_seasons?: number;
   seasons?: Season[];
+  genres?: Genre[];
+  genre_ids?: number[];
 }
 
 export interface Season {
@@ -58,6 +65,7 @@ export const tmdb = {
   getTVDetails: (id: number) => fetchTMDB(`/tv/${id}`),
   getSeason: (tvId: number, seasonNumber: number) => fetchTMDB(`/tv/${tvId}/season/${seasonNumber}`),
   getSimilar: (type: "movie" | "tv", id: number) => fetchTMDB(`/${type}/${id}/similar`),
+  getRecommendations: (type: "movie" | "tv", id: number) => fetchTMDB(`/${type}/${id}/recommendations`),
   searchMulti: (query: string) => fetchTMDB(`/search/multi?query=${encodeURIComponent(query)}`),
 };
 
