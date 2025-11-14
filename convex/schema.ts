@@ -18,6 +18,11 @@ export default defineSchema({
     code: v.string(),
     expiresAt: v.number(),
     used: v.optional(v.boolean()),
+    // Store pending registration data
+    pendingRegistration: v.optional(v.object({
+      name: v.string(),
+      password: v.string(),
+    })),
   }).index("by_email", ["email"]),
 
   watchHistory: defineTable({

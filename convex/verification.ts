@@ -7,12 +7,28 @@ function generateCode(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// Send verification code (in production, use Resend or similar)
+// Check if email verification is enabled
+export const isVerificationEnabled = query({
+  args: {},
+  handler: async () => {
+    return process.env.REQUIRE_EMAIL_VERIFICATION === "true";
+  },
+});
+
+// Send verification code with pending registration data
 export const sendVerificationCode = mutation({
   args: {
     email: v.string(),
+    name: v.optional(v.string()),
+    password: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const verificationEnabled = process.env.REQUIRE_EMAIL_VERIFICATION === "true";
+    
+    if (!verificationEnabled) {
+      return { success: true, code: "000000", verificationDisabled: true };
+    }
+
     const code = generateCode();
     const expiresAt = Date.now() + 15 * 60 * 1000; // 15 minutes
 
@@ -26,12 +42,16 @@ export const sendVerificationCode = mutation({
       await ctx.db.delete(item._id);
     }
 
-    // Store new code
+    // Store new code with pending registration data
     await ctx.db.insert("verificationCodes", {
       email: args.email,
       code,
       expiresAt,
       used: false,
+      pendingRegistration: args.name && args.password ? {
+        name: args.name,
+        password: args.password,
+      } : undefined,
     });
 
     // TODO: In production, send email via Resend or similar service
@@ -42,8 +62,8 @@ export const sendVerificationCode = mutation({
   },
 });
 
-// Verify code
-export const verifyCode = mutation({
+// Verify code and complete registration if pending
+export const verifyCodeAndRegister = mutation({
   args: {
     email: v.string(),
     code: v.string(),
@@ -73,7 +93,15 @@ export const verifyCode = mutation({
     // Mark as used
     await ctx.db.patch(verification._id, { used: true });
 
-    // Update user's email verification status
+    // If there's pending registration data, return it so the frontend can complete registration
+    if (verification.pendingRegistration) {
+      return { 
+        success: true, 
+        pendingRegistration: verification.pendingRegistration 
+      };
+    }
+
+    // Otherwise, just mark existing user as verified
     const user = await ctx.db
       .query("users")
       .withIndex("by_email", (q) => q.eq("email", args.email))
@@ -89,6 +117,9 @@ export const verifyCode = mutation({
     return { success: true };
   },
 });
+
+// Legacy verify code (for backward compatibility)
+export const verifyCode = verifyCodeAndRegister;
 
 // Check if email is verified
 export const isEmailVerified = query({
