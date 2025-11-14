@@ -1,12 +1,23 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { authTables } from "@convex-dev/auth/server";
 
 export default defineSchema({
+  ...authTables,
+  
   users: defineTable({
     name: v.optional(v.string()),
     email: v.string(),
     emailVerified: v.optional(v.number()),
     image: v.optional(v.string()),
+    isEmailVerified: v.optional(v.boolean()),
+  }).index("by_email", ["email"]),
+
+  verificationCodes: defineTable({
+    email: v.string(),
+    code: v.string(),
+    expiresAt: v.number(),
+    used: v.optional(v.boolean()),
   }).index("by_email", ["email"]),
 
   watchHistory: defineTable({
