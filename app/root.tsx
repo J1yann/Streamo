@@ -61,10 +61,12 @@ export default function App() {
   return (
     <ConvexClientProvider>
       <ThemeProvider>
-        <Navbar />
-        <Suspense fallback={<div className="pt-8"><ScrollerSkeleton /></div>}>
-          <Outlet />
-        </Suspense>
+        <div className="min-h-screen overflow-x-hidden">
+          <Navbar />
+          <Suspense fallback={<div className="pt-8"><ScrollerSkeleton /></div>}>
+            <Outlet />
+          </Suspense>
+        </div>
       </ThemeProvider>
     </ConvexClientProvider>
   );
