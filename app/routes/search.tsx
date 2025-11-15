@@ -17,7 +17,9 @@ export async function loader({ request }: Route.LoaderArgs) {
   try {
     const data = await tmdb.searchMulti(query);
     const results = (data.results || []).filter(
-      (item: Media) => item.media_type === "movie" || item.media_type === "tv"
+      (item: any) => 
+        (item.media_type === "movie" || item.media_type === "tv") && 
+        !item.adult // Explicitly filter out adult content
     );
     return { results, query };
   } catch (error) {

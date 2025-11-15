@@ -45,7 +45,7 @@ export interface Episode {
 
 async function fetchTMDB(endpoint: string) {
   const separator = endpoint.includes('?') ? '&' : '?';
-  const res = await fetch(`${BASE_URL}${endpoint}${separator}api_key=${TMDB_API_KEY}`);
+  const res = await fetch(`${BASE_URL}${endpoint}${separator}api_key=${TMDB_API_KEY}&include_adult=false`);
   if (!res.ok) throw new Error("TMDB API error");
   return res.json();
 }
