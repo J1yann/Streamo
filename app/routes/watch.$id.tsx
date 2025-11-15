@@ -16,21 +16,27 @@ import {
 import { WatchlistButton } from "~/components/WatchlistButton";
 import { useWatchHistory } from "~/hooks/useWatchHistory";
 
-export async function loader({ params }: Route.LoaderArgs) {
+export async function loader({ params, request }: Route.LoaderArgs) {
   const id = parseInt(params.id);
+  const url = new URL(request.url);
+  const mediaType = url.searchParams.get("type") as 'movie' | 'tv' | null;
   
   try {
-    // Try to fetch as movie first, then TV show
-    const media = await tmdb.getMovieDetails(id).catch(() => tmdb.getTVDetails(id));
-    const mediaType = media.title ? "movie" : "tv";
+    // Fetch based on media type from query param, or try movie first then TV show
+    const media = mediaType === 'tv' 
+      ? await tmdb.getTVDetails(id)
+      : mediaType === 'movie'
+      ? await tmdb.getMovieDetails(id)
+      : await tmdb.getMovieDetails(id).catch(() => tmdb.getTVDetails(id));
+    const actualMediaType = media.title ? "movie" : "tv";
     
     // Extract genre IDs from the current media
     const currentGenreIds = (media as any).genres?.map((g: any) => g.id) || [];
     
     // Fetch both similar and recommended content in parallel
     const [similarData, recommendedData] = await Promise.all([
-      tmdb.getSimilar(mediaType, id).catch(() => ({ results: [] })),
-      tmdb.getRecommendations(mediaType, id).catch(() => ({ results: [] })),
+      tmdb.getSimilar(actualMediaType, id).catch(() => ({ results: [] })),
+      tmdb.getRecommendations(actualMediaType, id).catch(() => ({ results: [] })),
     ]);
 
     // Combine and deduplicate results

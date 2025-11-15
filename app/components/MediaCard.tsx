@@ -10,6 +10,7 @@ interface MediaCardProps {
 export function MediaCard({ media, index = 0 }: MediaCardProps) {
   const title = getTitle(media);
   const year = getYear(media);
+  const mediaType = media.media_type || (media.title ? "movie" : "tv");
 
   return (
     <motion.div
@@ -18,7 +19,7 @@ export function MediaCard({ media, index = 0 }: MediaCardProps) {
       transition={{ delay: index * 0.05, duration: 0.2 }}
       className="group gpu-accelerated"
     >
-      <Link to={`/watch/${media.id}`} className="block">
+      <Link to={`/watch/${media.id}?type=${mediaType}`} className="block">
         <div className="relative aspect-2/3 rounded-xl overflow-hidden shadow-[0px_4px_12px_rgba(0,0,0,0.08)] dark:shadow-[0px_4px_16px_rgba(0,0,0,0.6)] group-hover:shadow-[0px_8px_32px_rgba(0,0,0,0.15)] dark:group-hover:shadow-[0px_10px_40px_rgba(0,0,0,0.8)] transition-shadow duration-200">
           <img
             src={getImageUrl(media.poster_path)}

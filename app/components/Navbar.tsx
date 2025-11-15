@@ -3,20 +3,39 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "~/lib/theme-context";
 import { Icon } from "./Icon";
 import { useState } from "react";
-import { Menu, X, Search } from "lucide-react";
+import { Menu, X, Search, ChevronDown, ChevronUp } from "lucide-react";
 import { AuthButton } from "./AuthButton";
 
 const navItems = [
   { path: "/home", label: "Home", icon: "home" },
   { path: "/movies", label: "Movies", icon: "movie" },
   { path: "/tvshows", label: "TV Shows", icon: "tv" },
-  { path: "/kids", label: "Kids", icon: "teddy" },
+  { path: "/kids", label: "Kids & Family", icon: "teddy" },
+];
+
+const genres = [
+  { id: 28, name: "Action", path: "/genre/action" },
+  { id: 12, name: "Adventure", path: "/genre/adventure" },
+  { id: 16, name: "Animation", path: "/genre/animation" },
+  { id: 35, name: "Comedy", path: "/genre/comedy" },
+  { id: 80, name: "Crime", path: "/genre/crime" },
+  { id: 99, name: "Documentary", path: "/genre/documentary" },
+  { id: 18, name: "Drama", path: "/genre/drama" },
+  { id: 10751, name: "Family", path: "/genre/family" },
+  { id: 14, name: "Fantasy", path: "/genre/fantasy" },
+  { id: 27, name: "Horror", path: "/genre/horror" },
+  { id: 10402, name: "Music", path: "/genre/music" },
+  { id: 9648, name: "Mystery", path: "/genre/mystery" },
+  { id: 10749, name: "Romance", path: "/genre/romance" },
+  { id: 878, name: "Sci-Fi", path: "/genre/sci-fi" },
+  { id: 53, name: "Thriller", path: "/genre/thriller" },
 ];
 
 export function Navbar() {
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isGenresOpen, setIsGenresOpen] = useState(false);
 
   return (
     <>
@@ -29,7 +48,7 @@ export function Navbar() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="md:hidden p-2 -ml-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+              className="p-2 -ml-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
               aria-label="Open menu"
             >
               <Menu size={24} />
@@ -37,30 +56,6 @@ export function Navbar() {
             <Link to="/" className="text-2xl font-bold text-[#4D7CFF]">
               Streamo
             </Link>
-          </div>
-
-          <div className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className="relative px-4 py-2 text-sm font-medium transition-colors"
-                >
-                  <span className={isActive ? "text-[#4D7CFF]" : "text-black/70 dark:text-white/70 hover:text-black dark:hover:text-white"}>
-                    {item.label}
-                  </span>
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeTab"
-                      className="absolute inset-0 bg-[#4D7CFF]/10 rounded-full"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                    />
-                  )}
-                </Link>
-              );
-            })}
           </div>
 
           <div className="flex items-center gap-2">
@@ -105,11 +100,16 @@ export function Navbar() {
               className="fixed inset-0 bg-black/50 z-50 md:hidden"
             />
             <motion.aside
-              initial={{ x: -280 }}
+              initial={{ x: "-100%" }}
               animate={{ x: 0 }}
-              exit={{ x: -280 }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 left-0 bottom-0 w-[280px] bg-white dark:bg-[#14171F] border-r border-black/10 dark:border-white/8 z-50 md:hidden"
+              exit={{ x: "-100%" }}
+              transition={{ 
+                type: "tween",
+                duration: 0.25,
+                ease: [0.32, 0.72, 0, 1]
+              }}
+              className="fixed top-0 left-0 bottom-0 w-[280px] bg-white dark:bg-[#14171F] border-r border-black/10 dark:border-white/8 z-50 overflow-y-auto"
+              style={{ willChange: "transform" }}
             >
               <div className="flex items-center justify-between p-4 border-b border-black/10 dark:border-white/8">
                 <span className="text-2xl font-bold text-[#4D7CFF]">Streamo</span>
@@ -122,18 +122,6 @@ export function Navbar() {
                 </button>
               </div>
               <nav className="p-4 space-y-2">
-                <Link
-                  to="/search"
-                  onClick={() => setIsSidebarOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                    location.pathname === "/search"
-                      ? "bg-[#4D7CFF]/10 text-[#4D7CFF]"
-                      : "text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5"
-                  }`}
-                >
-                  <Search size={20} />
-                  <span className="font-medium">Search</span>
-                </Link>
                 {navItems.map((item) => {
                   const isActive = location.pathname === item.path;
                   return (
@@ -152,6 +140,46 @@ export function Navbar() {
                     </Link>
                   );
                 })}
+
+                <div className="pt-2">
+                  <button
+                    onClick={() => setIsGenresOpen(!isGenresOpen)}
+                    className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-colors text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon name="library" size={20} />
+                      <span className="font-medium">Genres</span>
+                    </div>
+                    {isGenresOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  </button>
+
+                  <motion.div
+                    initial={false}
+                    animate={{ height: isGenresOpen ? "auto" : 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="pl-4 pt-1 space-y-1">
+                      {genres.map((genre) => {
+                        const isActive = location.pathname === genre.path;
+                        return (
+                          <Link
+                            key={genre.id}
+                            to={genre.path}
+                            onClick={() => setIsSidebarOpen(false)}
+                            className={`block px-4 py-2 rounded-lg text-sm transition-colors ${
+                              isActive
+                                ? "text-[#4D7CFF] bg-[#4D7CFF]/10"
+                                : "text-black/60 dark:text-white/60 hover:bg-black/5 dark:hover:bg-white/5"
+                            }`}
+                          >
+                            {genre.name}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                </div>
               </nav>
             </motion.aside>
           </>
