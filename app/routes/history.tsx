@@ -1,13 +1,20 @@
 import { useConvexAuth } from "convex/react";
 import { motion } from "framer-motion";
-import { History } from "lucide-react";
+import { History, Film, Tv } from "lucide-react";
 import { Link } from "react-router";
 import { MediaCard } from "~/components/MediaCard";
 import { useWatchHistory } from "~/hooks/useWatchHistory";
+import { useState } from "react";
 
 export default function HistoryPage() {
   const { isAuthenticated, isLoading } = useConvexAuth();
   const { history } = useWatchHistory();
+  const [filter, setFilter] = useState<"all" | "movie" | "tv">("all");
+
+  const filteredHistory =
+    filter === "all"
+      ? history
+      : history.filter((item: any) => item.mediaType === filter);
 
   if (isLoading) {
     return (
@@ -48,15 +55,51 @@ export default function HistoryPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="text-4xl font-bold mb-2 text-black dark:text-white">
+          <h1 className="text-4xl font-bold mb-4 text-black dark:text-white">
             Watch History
           </h1>
-          <p className="text-black/70 dark:text-white/70">
-            {history.length} {history.length === 1 ? "item" : "items"}
-          </p>
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <p className="text-black/70 dark:text-white/70">
+              {filteredHistory.length} {filteredHistory.length === 1 ? "item" : "items"}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setFilter("all")}
+                className={`px-4 py-2 rounded-full font-medium transition-colors ${
+                  filter === "all"
+                    ? "bg-[#4D7CFF] text-white"
+                    : "bg-white dark:bg-[#14171F] text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5"
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setFilter("movie")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-colors ${
+                  filter === "movie"
+                    ? "bg-[#4D7CFF] text-white"
+                    : "bg-white dark:bg-[#14171F] text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5"
+                }`}
+              >
+                <Film size={18} />
+                Movies
+              </button>
+              <button
+                onClick={() => setFilter("tv")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-colors ${
+                  filter === "tv"
+                    ? "bg-[#4D7CFF] text-white"
+                    : "bg-white dark:bg-[#14171F] text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5"
+                }`}
+              >
+                <Tv size={18} />
+                TV Shows
+              </button>
+            </div>
+          </div>
         </motion.div>
 
-        {history.length === 0 ? (
+        {filteredHistory.length === 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -78,7 +121,7 @@ export default function HistoryPage() {
           </motion.div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {history.map((item: any, index: number) => (
+            {filteredHistory.map((item: any, index: number) => (
               <motion.div
                 key={item._id}
                 initial={{ opacity: 0, y: 20 }}

@@ -1,13 +1,20 @@
 import { useConvexAuth } from "convex/react";
 import { motion } from "framer-motion";
-import { Bookmark } from "lucide-react";
+import { Bookmark, Film, Tv } from "lucide-react";
 import { Link } from "react-router";
 import { MediaCard } from "~/components/MediaCard";
 import { useWatchlist } from "~/hooks/useWatchlist";
+import { useState } from "react";
 
 export default function WatchlistPage() {
   const { isAuthenticated, isLoading } = useConvexAuth();
   const { watchlist } = useWatchlist();
+  const [filter, setFilter] = useState<"all" | "movie" | "tv">("all");
+
+  const filteredWatchlist =
+    filter === "all"
+      ? watchlist
+      : watchlist.filter((item: any) => item.mediaType === filter);
 
   if (isLoading) {
     return (
@@ -48,15 +55,51 @@ export default function WatchlistPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="text-4xl font-bold mb-2 text-black dark:text-white">
+          <h1 className="text-4xl font-bold mb-4 text-black dark:text-white">
             My Watchlist
           </h1>
-          <p className="text-black/70 dark:text-white/70">
-            {watchlist.length} {watchlist.length === 1 ? "item" : "items"}
-          </p>
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <p className="text-black/70 dark:text-white/70">
+              {filteredWatchlist.length} {filteredWatchlist.length === 1 ? "item" : "items"}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setFilter("all")}
+                className={`px-4 py-2 rounded-full font-medium transition-colors ${
+                  filter === "all"
+                    ? "bg-[#4D7CFF] text-white"
+                    : "bg-white dark:bg-[#14171F] text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5"
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setFilter("movie")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-colors ${
+                  filter === "movie"
+                    ? "bg-[#4D7CFF] text-white"
+                    : "bg-white dark:bg-[#14171F] text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5"
+                }`}
+              >
+                <Film size={18} />
+                Movies
+              </button>
+              <button
+                onClick={() => setFilter("tv")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-colors ${
+                  filter === "tv"
+                    ? "bg-[#4D7CFF] text-white"
+                    : "bg-white dark:bg-[#14171F] text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5"
+                }`}
+              >
+                <Tv size={18} />
+                TV Shows
+              </button>
+            </div>
+          </div>
         </motion.div>
 
-        {watchlist.length === 0 ? (
+        {filteredWatchlist.length === 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -78,7 +121,7 @@ export default function WatchlistPage() {
           </motion.div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {watchlist.map((item: any, index: number) => (
+            {filteredWatchlist.map((item: any, index: number) => (
               <motion.div
                 key={item._id}
                 initial={{ opacity: 0, y: 20 }}

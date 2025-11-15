@@ -8,6 +8,8 @@ export default [
   route("kids", "routes/kids.tsx"),
   route("search", "routes/search.tsx"),
   route("watchlist", "routes/watchlist.tsx"),
+  route("history", "routes/history.tsx"),
   route("signin", "routes/signin.tsx"),
   route("watch/:id", "routes/watch.$id.tsx"),
+  route("genre/:name", "routes/genre.$name.tsx"),
 ] satisfies RouteConfig;

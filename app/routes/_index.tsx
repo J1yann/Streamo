@@ -1,9 +1,24 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router";
+import { Link, Navigate } from "react-router";
 import { Hero } from "~/components/Hero";
 import { Icon } from "~/components/Icon";
+import { useConvexAuth } from "convex/react";
 
 export default function Landing() {
+  const { isAuthenticated, isLoading } = useConvexAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F6F8] dark:bg-[#0B0D13]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4D7CFF]"></div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/home" replace />;
+  }
+
   return (
     <div className="min-h-screen bg-[#F5F6F8] dark:bg-[#0B0D13]">
       <Hero

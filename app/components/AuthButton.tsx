@@ -16,10 +16,11 @@ export function AuthButton() {
   const { signOut } = useAuthActions();
   const currentUser = useQuery(api.users.getCurrentUser);
 
-  if (isLoading) {
+  // Show loading state while auth is initializing OR user data is loading
+  if (isLoading || (isAuthenticated && currentUser === undefined)) {
     return (
       <button className="p-2 rounded-full bg-black/5 dark:bg-white/5 text-black/50 dark:text-white/50 cursor-not-allowed">
-        <User size={20} />
+        <User size={20} className="animate-pulse" />
       </button>
     );
   }
