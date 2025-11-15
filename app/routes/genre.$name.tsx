@@ -2,24 +2,24 @@ import { useLoaderData, useParams } from "react-router";
 import { MediaCard } from "~/components/MediaCard";
 import { type Media } from "~/lib/tmdb";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Film, Tv, Loader2 } from "lucide-react";
 
-const GENRE_MAP: Record<string, { id: number; name: string }> = {
-  action: { id: 28, name: "Action" },
-  adventure: { id: 12, name: "Adventure" },
+const GENRE_MAP: Record<string, { id: number; tvId?: number; name: string }> = {
+  action: { id: 28, tvId: 10759, name: "Action" }, // TV: Action & Adventure
+  adventure: { id: 12, tvId: 10759, name: "Adventure" }, // TV: Action & Adventure
   animation: { id: 16, name: "Animation" },
   comedy: { id: 35, name: "Comedy" },
   crime: { id: 80, name: "Crime" },
   documentary: { id: 99, name: "Documentary" },
   drama: { id: 18, name: "Drama" },
-  family: { id: 10751, name: "Family" },
-  fantasy: { id: 14, name: "Fantasy" },
+  family: { id: 10751, tvId: 10762, name: "Family" }, // TV: Kids
+  fantasy: { id: 14, tvId: 10765, name: "Fantasy" }, // TV: Sci-Fi & Fantasy
   horror: { id: 27, name: "Horror" },
   music: { id: 10402, name: "Music" },
   mystery: { id: 9648, name: "Mystery" },
   romance: { id: 10749, name: "Romance" },
-  "sci-fi": { id: 878, name: "Sci-Fi" },
+  "sci-fi": { id: 878, tvId: 10765, name: "Sci-Fi" }, // TV: Sci-Fi & Fantasy
   thriller: { id: 53, name: "Thriller" },
 };
 
@@ -32,40 +32,54 @@ export async function loader({ params }: { params: { name: string } }) {
   }
 
   try {
+    const tvGenreId = genre.tvId || genre.id;
     const [movies, tvShows] = await Promise.all([
       fetch(
         `https://api.themoviedb.org/3/discover/movie?api_key=${import.meta.env.VITE_TMDB_API_KEY}&with_genres=${genre.id}&sort_by=popularity.desc&include_adult=false`
       ).then((r) => r.json()),
       fetch(
-        `https://api.themoviedb.org/3/discover/tv?api_key=${import.meta.env.VITE_TMDB_API_KEY}&with_genres=${genre.id}&sort_by=popularity.desc&include_adult=false`
+        `https://api.themoviedb.org/3/discover/tv?api_key=${import.meta.env.VITE_TMDB_API_KEY}&with_genres=${tvGenreId}&sort_by=popularity.desc&include_adult=false`
       ).then((r) => r.json()),
     ]);
 
     return {
       genre: genre.name,
-      movies: movies.results.map((m: any) => ({ ...m, media_type: "movie" })),
-      tvShows: tvShows.results.map((t: any) => ({ ...t, media_type: "tv" })),
+      genreId: genre.id,
+      tvGenreId,
+      movies: movies.results?.map((m: any) => ({ ...m, media_type: "movie" })) || [],
+      tvShows: tvShows.results?.map((t: any) => ({ ...t, media_type: "tv" })) || [],
     };
   } catch (error) {
     console.error("Failed to fetch genre content:", error);
-    return { genre: genre.name, movies: [], tvShows: [] };
+    return { genre: genre.name, genreId: genre.id, tvGenreId: genre.tvId || genre.id, movies: [], tvShows: [] };
   }
 }
 
 export default function GenrePage() {
   const loaderData = useLoaderData<typeof loader>();
   const params = useParams();
-  const { genre, movies: initialMovies, tvShows: initialTvShows } = loaderData as {
+  const { genre, genreId, tvGenreId, movies: initialMovies, tvShows: initialTvShows } = loaderData as {
     genre: string;
+    genreId: number;
+    tvGenreId: number;
     movies: Media[];
     tvShows: Media[];
   };
   const [filter, setFilter] = useState<"all" | "movie" | "tv">("all");
-  const [movies, setMovies] = useState(initialMovies);
-  const [tvShows, setTvShows] = useState(initialTvShows);
+  const [movies, setMovies] = useState<Media[]>(initialMovies || []);
+  const [tvShows, setTvShows] = useState<Media[]>(initialTvShows || []);
   const [moviePage, setMoviePage] = useState(1);
   const [tvPage, setTvPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Reset state when genre changes
+  useEffect(() => {
+    setMovies(initialMovies || []);
+    setTvShows(initialTvShows || []);
+    setMoviePage(1);
+    setTvPage(1);
+    setFilter("all");
+  }, [params.name, initialMovies, initialTvShows]);
 
   const filteredContent =
     filter === "all"
@@ -76,19 +90,17 @@ export default function GenrePage() {
 
   const loadMore = async () => {
     setIsLoading(true);
-    const genreName = params.name;
-    const genreInfo = GENRE_MAP[genreName!];
 
     try {
       if (filter === "all" || filter === "movie") {
         const nextMoviePage = moviePage + 1;
         const movieRes = await fetch(
-          `https://api.themoviedb.org/3/discover/movie?api_key=${import.meta.env.VITE_TMDB_API_KEY}&with_genres=${genreInfo.id}&sort_by=popularity.desc&include_adult=false&page=${nextMoviePage}`
+          `https://api.themoviedb.org/3/discover/movie?api_key=${import.meta.env.VITE_TMDB_API_KEY}&with_genres=${genreId}&sort_by=popularity.desc&include_adult=false&page=${nextMoviePage}`
         );
         const movieData = await movieRes.json();
         setMovies((prev) => [
           ...prev,
-          ...movieData.results.map((m: any) => ({ ...m, media_type: "movie" })),
+          ...(movieData.results?.map((m: any) => ({ ...m, media_type: "movie" })) || []),
         ]);
         setMoviePage(nextMoviePage);
       }
@@ -96,12 +108,12 @@ export default function GenrePage() {
       if (filter === "all" || filter === "tv") {
         const nextTvPage = tvPage + 1;
         const tvRes = await fetch(
-          `https://api.themoviedb.org/3/discover/tv?api_key=${import.meta.env.VITE_TMDB_API_KEY}&with_genres=${genreInfo.id}&sort_by=popularity.desc&include_adult=false&page=${nextTvPage}`
+          `https://api.themoviedb.org/3/discover/tv?api_key=${import.meta.env.VITE_TMDB_API_KEY}&with_genres=${tvGenreId}&sort_by=popularity.desc&include_adult=false&page=${nextTvPage}`
         );
         const tvData = await tvRes.json();
         setTvShows((prev) => [
           ...prev,
-          ...tvData.results.map((t: any) => ({ ...t, media_type: "tv" })),
+          ...(tvData.results?.map((t: any) => ({ ...t, media_type: "tv" })) || []),
         ]);
         setTvPage(nextTvPage);
       }
