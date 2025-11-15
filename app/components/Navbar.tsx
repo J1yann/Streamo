@@ -11,7 +11,6 @@ const navItems = [
   { path: "/movies", label: "Movies", icon: "movie" },
   { path: "/tvshows", label: "TV Shows", icon: "tv" },
   { path: "/kids", label: "Kids", icon: "teddy" },
-  { path: "/watchlist", label: "Watchlist", icon: "bookmark" },
 ];
 
 export function Navbar() {

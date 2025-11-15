@@ -26,7 +26,7 @@ export default function Landing() {
             Why Choose Streamo?
           </h2>
           <p className="text-lg text-black/70 dark:text-white/70 max-w-2xl mx-auto">
-            Experience cinema-quality streaming with our curated collection
+            Experience cinema-quality streaming hassle-free.
           </p>
         </motion.div>
 

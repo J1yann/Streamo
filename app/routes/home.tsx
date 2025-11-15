@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import type { Route } from "./+types/home";
 import { HorizontalScroller } from "~/components/HorizontalScroller";
 import { SignInBanner } from "~/components/SignInBanner";
+import { StreamingProviders } from "~/components/StreamingProviders";
 import { tmdb, type Media, getImageUrl, getTitle } from "~/lib/tmdb";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, Info, Star, ChevronLeft, ChevronRight } from "lucide-react";
@@ -197,6 +198,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-8 mb-8">
           <SignInBanner />
         </div>
+        <StreamingProviders />
         <HorizontalScroller title="Latest Releases" items={latestReleases} />
         <HorizontalScroller title="Latest Netflix Releases" items={netflix} />
         <HorizontalScroller title="Trending Now" items={trending} />
